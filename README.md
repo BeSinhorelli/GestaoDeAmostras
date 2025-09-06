@@ -4,4 +4,5 @@
 ---
 
 # Modelo fisico do banco de dados:
-<img width="846" height="433" alt="image" src="https://github.com/user-attachments/assets/5bbd6b4e-a962-4f32-9ba4-ec836ae526f7" />
+<img width="699" height="312" alt="image" src="https://github.com/user-attachments/assets/70c76df8-7ff3-4328-a45c-ac7290cd9b26" />
+
