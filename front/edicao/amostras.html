@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seleção e Edição de Amostras</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #333;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .page-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .back-button {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .back-button:hover {
+            background-color: #5a6268;
+            transform: translateY(-2px);
+        }
+        
+        .container {
+            max-width: 1400px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            font-size: 28px;
+        }
+        
+        .search-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .search-box {
+            flex: 1;
+            position: relative;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 14px 14px 14px 45px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .search-input:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #7f8c8d;
+        }
+        
+        .amostras-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .amostras-table th,
+        .amostras-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .amostras-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+            cursor: pointer;
+            transition: background 0.3s;
+            white-space: nowrap;
+        }
+        
+        .amostras-table th:hover {
+            background-color: #e9ecef;
+        }
+        
+        .amostras-table tr {
+            transition: background 0.3s;
+        }
+        
+        .amostras-table tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .amostras-table tr.selected {
+            background-color: #e3f2fd;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 0;
+            color: #7f8c8d;
+        }
+        
+        .empty-state i {
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
+        
+        .empty-state p {
+            font-size: 18px;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 25px;
+            gap: 10px;
+        }
+        
+        .pagination button {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .pagination button:hover {
+            background: #f8f9fa;
+        }
+        
+        .pagination button.active {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+        
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+        
+        .status-ativa {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .status-finalizada {
+            background-color: #e3f2fd;
+            color: #1565c0;
+        }
+        
+        .status-pendente {
+            background-color: #fff3e0;
+            color: #ef6c00;
+        }
+        
+        .info-small {
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+        
+        /* Formulário de Edição */
+        .form-container {
+            display: none;
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #eee;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(46, 204, 113, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+            color: white;
+            box-shadow: 0 4px 10px rgba(149, 165, 166, 0.3);
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(149, 165, 166, 0.4);
+        }
+        
+        .required::after {
+            content: " *";
+            color: #e74c3c;
+        }
+        
+        .input-icon {
+            position: relative;
+        }
+        
+        .input-icon i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #7f8c8d;
+        }
+        
+        .input-icon input, .input-icon select {
+            padding-left: 40px;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s;
+            z-index: 1000;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .notification.success {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .notification.error {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        @media (max-width: 1024px) {
+            .container {
+                overflow-x: auto;
+            }
+            
+            .amostras-table {
+                min-width: 1000px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            .search-container {
+                flex-direction: column;
+            }
+            
+            .amostras-table {
+                display: block;
+                overflow-x: auto;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="page-title">
+            <button class="back-button" onclick="history.back()">
+                <i class="fas fa-arrow-left"></i> Voltar
+            </button>
+            <h1>Seleção e Edição de Amostras</h1>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="search-container">
+            <div class="search-box">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input" id="searchInput" placeholder="Buscar amostras por protocolo, modelo, produto...">
+            </div>
+        </div>
+        
+        <table class="amostras-table">
+            <thead>
+                <tr>
+                    <th>Selecionar</th>
+                    <th onclick="sortTable(1)">Protocolo <i class="fas fa-sort"></i></th>
+                    <th onclick="sortTable(2)">Modelo <i class="fas fa-sort"></i></th>
+                    <th onclick="sortTable(3)">Produto <i class="fas fa-sort"></i></th>
+                    <th onclick="sortTable(4)">Nº Série <i class="fas fa-sort"></i></th>
+                    <th onclick="sortTable(5)">Cliente <i class="fas fa-sort"></i></th>
+                    <th onclick="sortTable(6)">Fabricante <i class="fas fa-sort"></i></th>
+                    <th onclick="sortTable(7)">Recebimento <i class="fas fa-sort"></i></th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="amostrasTableBody">
+                <!-- Os dados das amostras serão inseridos aqui via JavaScript -->
+            </tbody>
+        </table>
+        
+        <div id="emptyState" class="empty-state" style="display: none;">
+            <i class="fas fa-vial"></i>
+            <p>Nenhuma amostra encontrada</p>
+        </div>
+        
+        <div class="pagination" id="pagination">
+            <!-- A paginação será inserida aqui via JavaScript -->
+        </div>
+        
+        <!-- Formulário de Edição -->
+        <div id="formContainer" class="form-container">
+            <h2>Editar Amostra Selecionada</h2>
+            <form id="amostraForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="protocolo" class="required">Protocolo</label>
+                        <div class="input-icon">
+                            <i class="fas fa-file-alt"></i>
+                            <input type="text" id="protocolo" name="protocolo" required maxlength="50">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="orcamento" class="required">Orçamento</label>
+                        <div class="input-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <input type="text" id="orcamento" name="orcamento" required maxlength="50">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="modelo" class="required">Modelo</label>
+                        <div class="input-icon">
+                            <i class="fas fa-microchip"></i>
+                            <input type="text" id="modelo" name="modelo" required maxlength="100">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="produto" class="required">Produto</label>
+                        <div class="input-icon">
+                            <i class="fas fa-box"></i>
+                            <input type="text" id="produto" name="produto" required maxlength="100">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tensao_alimentacao" class="required">Tensão de Alimentação</label>
+                        <div class="input-icon">
+                            <i class="fas fa-bolt"></i>
+                            <input type="text" id="tensao_alimentacao" name="tensao_alimentacao" required maxlength="50">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="data_recebimento" class="required">Data de Recebimento</label>
+                        <div class="input-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                            <input type="date" id="data_recebimento" name="data_recebimento" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="numero_serie" class="required">Número de Série</label>
+                        <div class="input-icon">
+                            <i class="fas fa-barcode"></i>
+                            <input type="text" id="numero_serie" name="numero_serie" required maxlength="100">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="status" class="required">Status</label>
+                        <div class="input-icon">
+                            <i class="fas fa-check-circle"></i>
+                            <select id="status" name="status" required>
+                                <option value="ativa">Ativa</option>
+                                <option value="pendente">Pendente</option>
+                                <option value="finalizada">Finalizada</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="cliente">Cliente</label>
+                    <div class="input-icon">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="cliente" name="cliente" readonly>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="fabricante">Fabricante</label>
+                    <div class="input-icon">
+                        <i class="fas fa-industry"></i>
+                        <input type="text" id="fabricante" name="fabricante" readonly>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="observacoes">Observações</label>
+                    <textarea id="observacoes" name="observacoes" rows="4" placeholder="Digite observações sobre a amostra"></textarea>
+                </div>
+                
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Salvar Alterações
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="cancelEdit()">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script>
+        // Dados de exemplo (em uma aplicação real, viriam de uma API)
+        const amostras = [
+            { 
+                id: 1, 
+                protocolo: "PROT-2023-001", 
+                orcamento: "ORC-001",
+                modelo: "MX-500", 
+                produto: "Multímetro Digital", 
+                numero_serie: "SN123456789",
+                tensao_alimentacao: "110V",
+                data_recebimento: "2023-05-15",
+                cliente: "Empresa ABC Ltda",
+                fabricante: "Fabricante Alpha",
+                status: "ativa",
+                observacoes: "Equipamento com possível problema na medição de resistência"
+            },
+            { 
+                id: 2, 
+                protocolo: "PROT-2023-002", 
+                orcamento: "ORC-002",
+                modelo: "OSC-100", 
+                produto: "Osciloscópio", 
+                numero_serie: "SN987654321",
+                tensao_alimentacao: "220V",
+                data_recebimento: "2023-05-18",
+                cliente: "Comércio XYZ S/A",
+                fabricante: "Indústrias Beta",
+                status: "finalizada",
+                observacoes: "Calibração realizada com sucesso"
+            },
+            { 
+                id: 3, 
+                protocolo: "PROT-2023-003", 
+                orcamento: "ORC-003",
+                modelo: "PWR-200", 
+                produto: "Fonte de Alimentação", 
+                numero_serie: "SN456789123",
+                tensao_alimentacao: "Bivolt",
+                data_recebimento: "2023-05-20",
+                cliente: "João Silva ME",
+                fabricante: "Gamma Eletrônicos",
+                status: "pendente",
+                observacoes: "Aguardando peças para reparo"
+            },
+            { 
+                id: 4, 
+                protocolo: "PROT-2023-004", 
+                orcamento: "ORC-004",
+                modelo: "GEN-300", 
+                produto: "Gerador de Sinais", 
+                numero_serie: "SN789123456",
+                tensao_alimentacao: "220V",
+                data_recebimento: "2023-05-22",
+                cliente: "Maria Santos EIRELI",
+                fabricante: "Delta Tech",
+                status: "ativa",
+                observacoes: ""
+            },
+            { 
+                id: 5, 
+                protocolo: "PROT-2023-005", 
+                orcamento: "ORC-005",
+                modelo: "TST-400", 
+                produto: "Analisador de Espectro", 
+                numero_serie: "SN321654987",
+                tensao_alimentacao: "110V",
+                data_recebimento: "2023-05-25",
+                cliente: "Indústrias Fernandes",
+                fabricante: "Omega Components",
+                status: "ativa",
+                observacoes: "Problema intermitente na saída de RF"
+            }
+        ];
+
+        // Variáveis para controle de paginação e ordenação
+        let currentPage = 1;
+        const itemsPerPage = 5;
+        let sortColumn = 7; // Ordenar por data de recebimento por padrão
+        let sortDirection = 'desc'; // Ordenar do mais recente para o mais antigo
+        let filteredAmostras = [...amostras];
+        let amostraSelecionada = null;
+
+        // Inicializar a tabela
+        document.addEventListener('DOMContentLoaded', function() {
+            renderTable();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            // Busca em tempo real
+            document.getElementById('searchInput').addEventListener('input', function() {
+                filterAmostras();
+            });
+            
+            // Form submission
+            document.getElementById('amostraForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                salvarEdicao();
+            });
+        }
+
+        function filterAmostras() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            filteredAmostras = amostras.filter(amostra => {
+                return amostra.protocolo.toLowerCase().includes(searchTerm) || 
+                       amostra.modelo.toLowerCase().includes(searchTerm) ||
+                       amostra.produto.toLowerCase().includes(searchTerm) ||
+                       amostra.numero_serie.toLowerCase().includes(searchTerm) ||
+                       amostra.cliente.toLowerCase().includes(searchTerm) ||
+                       amostra.fabricante.toLowerCase().includes(searchTerm);
+            });
+            
+            currentPage = 1;
+            renderTable();
+        }
+
+        function renderTable() {
+            const tableBody = document.getElementById('amostrasTableBody');
+            const emptyState = document.getElementById('emptyState');
+            const formContainer = document.getElementById('formContainer');
+            
+            // Ordenar amostras
+            sortAmostras();
+            
+            // Calcular paginação
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedAmostras = filteredAmostras.slice(startIndex, endIndex);
+            
+            // Limpar tabela
+            tableBody.innerHTML = '';
+            
+            if (paginatedAmostras.length === 0) {
+                emptyState.style.display = 'block';
+                document.querySelector('.amostras-table').style.display = 'none';
+                document.getElementById('pagination').innerHTML = '';
+                formContainer.style.display = 'none';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            document.querySelector('.amostras-table').style.display = 'table';
+            formContainer.style.display = amostraSelecionada ? 'block' : 'none';
+            
+            // Preencher tabela com dados
+            paginatedAmostras.forEach(amostra => {
+                const row = document.createElement('tr');
+                const isSelected = amostraSelecionada && amostraSelecionada.id === amostra.id;
+                
+                if (isSelected) {
+                    row.classList.add('selected');
+                }
+                
+                // Formatar data para exibição
+                const dataRecebimento = new Date(amostra.data_recebimento);
+                const dataFormatada = dataRecebimento.toLocaleDateString('pt-BR');
+                
+                // Determinar classe de status
+                let statusClass = '';
+                let statusText = '';
+                
+                switch(amostra.status) {
+                    case 'ativa':
+                        statusClass = 'status-ativa';
+                        statusText = 'Ativa';
+                        break;
+                    case 'finalizada':
+                        statusClass = 'status-finalizada';
+                        statusText = 'Finalizada';
+                        break;
+                    case 'pendente':
+                        statusClass = 'status-pendente';
+                        statusText = 'Pendente';
+                        break;
+                }
+                
+                row.innerHTML = `
+                    <td>
+                        <input type="radio" name="amostraSelecionada" ${isSelected ? 'checked' : ''} 
+                               onchange="selecionarAmostra(${amostra.id})">
+                    </td>
+                    <td><strong>${amostra.protocolo}</strong></td>
+                    <td>${amostra.modelo}<br><span class="info-small">${amostra.tensao_alimentacao}</span></td>
+                    <td>${amostra.produto}</td>
+                    <td>${amostra.numero_serie}</td>
+                    <td>${amostra.cliente}</td>
+                    <td>${amostra.fabricante}</td>
+                    <td>${dataFormatada}</td>
+                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+            
+            renderPagination();
+            
+            // Preencher formulário se houver amostra selecionada
+            if (amostraSelecionada) {
+                preencherFormulario(amostraSelecionada);
+            }
+        }
+
+        function renderPagination() {
+            const totalPages = Math.ceil(filteredAmostras.length / itemsPerPage);
+            const paginationContainer = document.getElementById('pagination');
+            
+            paginationContainer.innerHTML = '';
+            
+            if (totalPages <= 1) return;
+            
+            // Botão anterior
+            if (currentPage > 1) {
+                const prevButton = document.createElement('button');
+                prevButton.innerHTML = '<i class="fas fa-chevron-left"></i>';
+                prevButton.addEventListener('click', () => {
+                    currentPage--;
+                    renderTable();
+                });
+                paginationContainer.appendChild(prevButton);
+            }
+            
+            // Números das páginas
+            for (let i = 1; i <= totalPages; i++) {
+                const pageButton = document.createElement('button');
+                pageButton.textContent = i;
+                pageButton.classList.toggle('active', i === currentPage);
+                pageButton.addEventListener('click', () => {
+                    currentPage = i;
+                    renderTable();
+                });
+                paginationContainer.appendChild(pageButton);
+            }
+            
+            // Botão próximo
+            if (currentPage < totalPages) {
+                const nextButton = document.createElement('button');
+                nextButton.innerHTML = '<i class="fas fa-chevron-right"></i>';
+                nextButton.addEventListener('click', () => {
+                    currentPage++;
+                    renderTable();
+                });
+                paginationContainer.appendChild(nextButton);
+            }
+        }
+
+        function sortTable(columnIndex) {
+            if (sortColumn === columnIndex) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortColumn = columnIndex;
+                sortDirection = 'asc';
+            }
+            renderTable();
+        }
+
+        function sortAmostras() {
+            filteredAmostras.sort((a, b) => {
+                let valueA, valueB;
+                
+                switch (sortColumn) {
+                    case 1: valueA = a.protocolo; valueB = b.protocolo; break;
+                    case 2: valueA = a.modelo; valueB = b.modelo; break;
+                    case 3: valueA = a.produto; valueB = b.produto; break;
+                    case 4: valueA = a.numero_serie; valueB = b.numero_serie; break;
+                    case 5: valueA = a.cliente; valueB = b.cliente; break;
+                    case 6: valueA = a.fabricante; valueB = b.fabricante; break;
+                    case 7: valueA = new Date(a.data_recebimento); valueB = new Date(b.data_recebimento); break;
+                    default: valueA = a.protocolo; valueB = b.protocolo;
+                }
+                
+                if (valueA < valueB) return sortDirection === 'asc' ? -1 : 1;
+                if (valueA > valueB) return sortDirection === 'asc' ? 1 : -1;
+                return 0;
+            });
+        }
+
+        function selecionarAmostra(id) {
+            amostraSelecionada = amostras.find(a => a.id === id);
+            renderTable();
+        }
+
+        function preencherFormulario(amostra) {
+            document.getElementById('protocolo').value = amostra.protocolo;
+            document.getElementById('orcamento').value = amostra.orcamento;
+            document.getElementById('modelo').value = amostra.modelo;
+            document.getElementById('produto').value = amostra.produto;
+            document.getElementById('tensao_alimentacao').value = amostra.tensao_alimentacao;
+            document.getElementById('data_recebimento').value = amostra.data_recebimento;
+            document.getElementById('numero_serie').value = amostra.numero_serie;
+            document.getElementById('status').value = amostra.status;
+            document.getElementById('cliente').value = amostra.cliente;
+            document.getElementById('fabricante').value = amostra.fabricante;
+            document.getElementById('observacoes').value = amostra.observacoes || '';
+        }
+
+        function cancelEdit() {
+            amostraSelecionada = null;
+            renderTable();
+        }
+
+        function salvarEdicao() {
+            if (!amostraSelecionada) return;
+            
+            // Obter valores do formulário
+            const protocolo = document.getElementById('protocolo').value;
+            const orcamento = document.getElementById('orcamento').value;
+            const modelo = document.getElementById('modelo').value;
+            const produto = document.getElementById('produto').value;
+            const tensao_alimentacao = document.getElementById('tensao_alimentacao').value;
+            const data_recebimento = document.getElementById('data_recebimento').value;
+            const numero_serie = document.getElementById('numero_serie').value;
+            const status = document.getElementById('status').value;
+            const observacoes = document.getElementById('observacoes').value;
+            
+            // Atualizar amostra (em uma aplicação real, seria uma requisição à API)
+            const index = amostras.findIndex(a => a.id === amostraSelecionada.id);
+            if (index !== -1) {
+                amostras[index] = {
+                    ...amostras[index],
+                    protocolo,
+                    orcamento,
+                    modelo,
+                    produto,
+                    tensao_alimentacao,
+                    data_recebimento,
+                    numero_serie,
+                    status,
+                    observacoes
+                };
+                
+                showNotification('Amostra atualizada com sucesso!', 'success');
+                
+                // Atualizar a tabela
+                filterAmostras();
+            }
+        }
+
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = 'notification ' + type;
+            
+            setTimeout(() => {
+                notification.className = 'notification';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

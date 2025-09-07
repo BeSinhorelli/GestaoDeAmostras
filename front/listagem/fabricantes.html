@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listagem de Fabricantes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #333;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .back-button {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .back-button:hover {
+            background-color: #5a6268;
+            transform: translateY(-2px);
+        }
+        
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            font-size: 28px;
+            margin-left: 20px;
+        }
+        
+        .search-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .search-box {
+            flex: 1;
+            position: relative;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 14px 14px 14px 45px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .search-input:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #7f8c8d;
+        }
+        
+        .fabricantes-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .fabricantes-table th,
+        .fabricantes-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .fabricantes-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .fabricantes-table th:hover {
+            background-color: #e9ecef;
+        }
+        
+        .fabricantes-table tr {
+            transition: background 0.3s;
+        }
+        
+        .fabricantes-table tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 0;
+            color: #7f8c8d;
+        }
+        
+        .empty-state i {
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
+        
+        .empty-state p {
+            font-size: 18px;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 25px;
+            gap: 10px;
+        }
+        
+        .pagination button {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .pagination button:hover {
+            background: #f8f9fa;
+        }
+        
+        .pagination button.active {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+        
+        .contact-info {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            h1 {
+                margin-left: 0;
+            }
+            
+            .search-container {
+                flex-direction: column;
+            }
+            
+            .fabricantes-table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <button class="back-button" onclick="history.back()">
+            <i class="fas fa-arrow-left"></i> Voltar
+        </button>
+        <h1>Listagem de Fabricantes</h1>
+    </div>
+    
+    <div class="container">
+        <div class="search-container">
+            <div class="search-box">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input" id="searchInput" placeholder="Buscar fabricantes...">
+            </div>
+        </div>
+        
+        <table class="fabricantes-table">
+            <thead>
+                <tr>
+                    <th onclick="sortTable(0)">Nome <i class="fas fa-sort"></i></th>
+                    <th onclick="sortTable(1)">Localização <i class="fas fa-sort"></i></th>
+                    <th onclick="sortTable(2)">Contato <i class="fas fa-sort"></i></th>
+                    <th>Telefone</th>
+                    <th>E-mail</th>
+                </tr>
+            </thead>
+            <tbody id="fabricantesTableBody">
+                <!-- Os dados dos fabricantes serão inseridos aqui via JavaScript -->
+            </tbody>
+        </table>
+        
+        <div id="emptyState" class="empty-state" style="display: none;">
+            <i class="fas fa-industry"></i>
+            <p>Nenhum fabricante encontrado</p>
+        </div>
+        
+        <div class="pagination" id="pagination">
+            <!-- A paginação será inserida aqui via JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        // Dados de exemplo (em uma aplicação real, viriam de uma API)
+        const fabricantes = [
+            { 
+                id: 1, 
+                nome: "Fabricante Alpha", 
+                localizacao: "São Paulo, SP", 
+                contato: "Carlos Silva", 
+                telefone: "(11) 99999-9999", 
+                email: "contato@fabricantealpha.com.br"
+            },
+            { 
+                id: 2, 
+                nome: "Indústrias Beta", 
+                localizacao: "Rio de Janeiro, RJ", 
+                contato: "Ana Santos", 
+                telefone: "(21) 98888-8888", 
+                email: "vendas@industriasbeta.com.br"
+            },
+            { 
+                id: 3, 
+                nome: "Gamma Eletrônicos", 
+                localizacao: "Belo Horizonte, MG", 
+                contato: "Paulo Oliveira", 
+                telefone: "(31) 97777-7777", 
+                email: "contato@gammaeletronicos.com.br"
+            },
+            { 
+                id: 4, 
+                nome: "Delta Tech", 
+                localizacao: "Porto Alegre, RS", 
+                contato: "Maria Fernandes", 
+                telefone: "(51) 96666-6666", 
+                email: "info@deltatech.com.br"
+            },
+            { 
+                id: 5, 
+                nome: "Omega Components", 
+                localizacao: "Curitiba, PR", 
+                contato: "Roberto Alves", 
+                telefone: "(41) 95555-5555", 
+                email: "vendas@omegacomponents.com.br"
+            },
+            { 
+                id: 6, 
+                nome: "Sigma Equipamentos", 
+                localizacao: "Campinas, SP", 
+                contato: "Fernanda Lima", 
+                telefone: "(19) 94444-4444", 
+                email: "contato@sigmaequipamentos.com.br"
+            },
+            { 
+                id: 7, 
+                nome: "Theta Solutions", 
+                localizacao: "Florianópolis, SC", 
+                contato: "Ricardo Martins", 
+                telefone: "(48) 93333-3333", 
+                email: "comercial@thetasolutions.com.br"
+            },
+            { 
+                id: 8, 
+                nome: "Lambda Sistemas", 
+                localizacao: "Salvador, BA", 
+                contato: "Juliana Costa", 
+                telefone: "(71) 92222-2222", 
+                email: "contato@lambdasistemas.com.br"
+            },
+            { 
+                id: 9, 
+                nome: "Kappa Tecnologia", 
+                localizacao: "Recife, PE", 
+                contato: "Pedro Rocha", 
+                telefone: "(81) 91111-1111", 
+                email: "suporte@kappatecnologia.com.br"
+            },
+            { 
+                id: 10, 
+                nome: "Zeta Instruments", 
+                localizacao: "Brasília, DF", 
+                contato: "Amanda Dias", 
+                telefone: "(61) 90000-0000", 
+                email: "contato@zetainstruments.com.br"
+            }
+        ];
+
+        // Variáveis para controle de paginação e ordenação
+        let currentPage = 1;
+        const itemsPerPage = 8;
+        let sortColumn = 0;
+        let sortDirection = 'asc';
+        let filteredFabricantes = [...fabricantes];
+
+        // Inicializar a tabela
+        document.addEventListener('DOMContentLoaded', function() {
+            renderTable();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            // Busca em tempo real
+            document.getElementById('searchInput').addEventListener('input', function() {
+                filterFabricantes();
+            });
+        }
+
+        function filterFabricantes() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            filteredFabricantes = fabricantes.filter(fabricante => {
+                return fabricante.nome.toLowerCase().includes(searchTerm) || 
+                       fabricante.localizacao.toLowerCase().includes(searchTerm) ||
+                       fabricante.contato.toLowerCase().includes(searchTerm);
+            });
+            
+            currentPage = 1;
+            renderTable();
+        }
+
+        function renderTable() {
+            const tableBody = document.getElementById('fabricantesTableBody');
+            const emptyState = document.getElementById('emptyState');
+            
+            // Ordenar fabricantes
+            sortFabricantes();
+            
+            // Calcular paginação
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedFabricantes = filteredFabricantes.slice(startIndex, endIndex);
+            
+            // Limpar tabela
+            tableBody.innerHTML = '';
+            
+            if (paginatedFabricantes.length === 0) {
+                emptyState.style.display = 'block';
+                document.querySelector('.fabricantes-table').style.display = 'none';
+                document.getElementById('pagination').innerHTML = '';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            document.querySelector('.fabricantes-table').style.display = 'table';
+            
+            // Preencher tabela com dados
+            paginatedFabricantes.forEach(fabricante => {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${fabricante.nome}</td>
+                    <td>${fabricante.localizacao}</td>
+                    <td>${fabricante.contato}</td>
+                    <td>${fabricante.telefone}</td>
+                    <td class="contact-info">${fabricante.email}</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+            
+            renderPagination();
+        }
+
+        function renderPagination() {
+            const totalPages = Math.ceil(filteredFabricantes.length / itemsPerPage);
+            const paginationContainer = document.getElementById('pagination');
+            
+            paginationContainer.innerHTML = '';
+            
+            if (totalPages <= 1) return;
+            
+            // Botão anterior
+            if (currentPage > 1) {
+                const prevButton = document.createElement('button');
+                prevButton.innerHTML = '<i class="fas fa-chevron-left"></i>';
+                prevButton.addEventListener('click', () => {
+                    currentPage--;
+                    renderTable();
+                });
+                paginationContainer.appendChild(prevButton);
+            }
+            
+            // Números das páginas
+            for (let i = 1; i <= totalPages; i++) {
+                const pageButton = document.createElement('button');
+                pageButton.textContent = i;
+                pageButton.classList.toggle('active', i === currentPage);
+                pageButton.addEventListener('click', () => {
+                    currentPage = i;
+                    renderTable();
+                });
+                paginationContainer.appendChild(pageButton);
+            }
+            
+            // Botão próximo
+            if (currentPage < totalPages) {
+                const nextButton = document.createElement('button');
+                nextButton.innerHTML = '<i class="fas fa-chevron-right"></i>';
+                nextButton.addEventListener('click', () => {
+                    currentPage++;
+                    renderTable();
+                });
+                paginationContainer.appendChild(nextButton);
+            }
+        }
+
+        function sortTable(columnIndex) {
+            if (sortColumn === columnIndex) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortColumn = columnIndex;
+                sortDirection = 'asc';
+            }
+            renderTable();
+        }
+
+        function sortFabricantes() {
+            filteredFabricantes.sort((a, b) => {
+                let valueA, valueB;
+                
+                switch (sortColumn) {
+                    case 0: valueA = a.nome; valueB = b.nome; break;
+                    case 1: valueA = a.localizacao; valueB = b.localizacao; break;
+                    case 2: valueA = a.contato; valueB = b.contato; break;
+                    default: valueA = a.nome; valueB = b.nome;
+                }
+                
+                if (valueA < valueB) return sortDirection === 'asc' ? -1 : 1;
+                if (valueA > valueB) return sortDirection === 'asc' ? 1 : -1;
+                return 0;
+            });
+        }
+    </script>
+</body>
+</html>
